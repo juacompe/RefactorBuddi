@@ -21,6 +21,8 @@
     <bytecodeTargetLevel>
       <module name="org.homeunix.thecave.buddi_main" target="1.5" />
       <module name="org.homeunix.thecave.buddi_test" target="1.5" />
+      <module name="org.homeunix.thecave.org.homeunix.thecave.buddi_main" target="1.8" />
+      <module name="org.homeunix.thecave.org.homeunix.thecave.buddi_test" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
