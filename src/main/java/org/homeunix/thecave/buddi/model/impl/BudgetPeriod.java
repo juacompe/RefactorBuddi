@@ -21,6 +21,10 @@ public class BudgetPeriod {
         return this.budgetPeriodType.getStartOfBudgetPeriod(getDate());
     }
 
+    Date getEndDate() {
+        return this.budgetPeriodType.getEndOfBudgetPeriod(getDate());
+    }
+
     @Override
     public boolean equals(Object obj) {
         return getStartDate().equals(((BudgetPeriod) obj).getStartDate());
@@ -32,5 +36,17 @@ public class BudgetPeriod {
 
     BudgetPeriod getPrevious() {
         return new BudgetPeriod(budgetPeriodType.getBudgetPeriodOffset(getDate(), -1), budgetPeriodType);
+    }
+
+    long getDays() {
+        return budgetPeriodType.getDaysInPeriod(getStartDate());
+    }
+
+    long getAmount(BudgetCategoryImpl budgetCategory) {
+        return budgetCategory.getAmount(getStartDate());
+    }
+
+    public Period getPeriod() {
+        return new Period(getStartDate(), getEndDate());
     }
 }

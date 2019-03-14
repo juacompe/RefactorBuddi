@@ -1,5 +1,7 @@
 package org.homeunix.thecave.buddi.model.impl;
 
+import ca.digitalcave.moss.common.DateUtil;
+
 import java.util.Date;
 
 public class Period {
@@ -17,5 +19,15 @@ public class Period {
 
     public Date getEndDate() {
         return endDate;
+    }
+
+    int getDaysBetween() {
+        return DateUtil.getDaysBetween(getStartDate(), getEndDate(), true);
+    }
+
+    public long getOverlappingDays(Period p) {
+        Date laterStart = startDate.after(p.startDate)? startDate: p.startDate;
+        Date earlierEnd = endDate.before(p.endDate)? endDate: p.endDate;
+        return new Period(laterStart, earlierEnd).getDaysBetween();
     }
 }
