@@ -107,11 +107,11 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
 
     private long getAmount(Period period) {
         //If Start and End are in the same budget period
-        BudgetPeriod firstBudgetPeriod = new BudgetPeriod(period.getStartDate());
-        BudgetPeriod lastBudgetPeriod = new BudgetPeriod(period.getEndDate());
-        Date startOfFirstBudgetPeriod = firstBudgetPeriod.getStartDate(this);
+        BudgetPeriod firstBudgetPeriod = createBudgetPeriod(period.getStartDate());
+        BudgetPeriod lastBudgetPeriod = createBudgetPeriod(period.getEndDate());
+        Date startOfFirstBudgetPeriod = firstBudgetPeriod.getStartDate();
         Date endOfFirstBudgetPeriod = getBudgetPeriodType().getEndOfBudgetPeriod(period.getStartDate());
-        Date startOfLastBudgetPeriod = lastBudgetPeriod.getStartDate(this);
+        Date startOfLastBudgetPeriod = lastBudgetPeriod.getStartDate();
         if (startOfFirstBudgetPeriod.equals(startOfLastBudgetPeriod)) {
             return (long) getAmountFromPeriod(period);
         }
@@ -154,7 +154,7 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
     public List<String> getBudgetPeriods(Date startDate, Date endDate) {
         List<String> budgetPeriodKeys = new LinkedList<String>();
 
-        Date temp = new BudgetPeriod(startDate).getStartDate(this);
+        Date temp = createBudgetPeriod(startDate).getStartDate();
 
         while (temp.before(getBudgetPeriodType().getEndOfBudgetPeriod(endDate))) {
             budgetPeriodKeys.add(getPeriodKey(temp));
@@ -162,6 +162,10 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
         }
 
         return budgetPeriodKeys;
+    }
+
+    private BudgetPeriod createBudgetPeriod(Date startDate) {
+        return new BudgetPeriod(startDate, getBudgetPeriodType());
     }
 
     /**
@@ -254,7 +258,7 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
      * @return
      */
     private String getPeriodKey(Date periodDate) {
-        Date d = new BudgetPeriod(periodDate).getStartDate(this);
+        Date d = createBudgetPeriod(periodDate).getStartDate();
         return getBudgetPeriodType().getName() + ":" + DateUtil.getYear(d) + ":" + DateUtil.getMonth(d) + ":" + DateUtil.getDay(d);
     }
 
