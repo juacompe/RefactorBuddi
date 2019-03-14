@@ -100,23 +100,23 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
     public long getAmount(Date startDate, Date endDate) {
         if (startDate.after(endDate))
             throw new RuntimeException("Start date cannot be before End Date!");
-        return getAmount(new Period(startDate, endDate));
+        return getAmountForPeriodWithinBudgetPeriod(new Period(startDate, endDate));
 
 
     }
 
-    private long getAmount(Period period) {
+    private long getAmountForPeriodWithinBudgetPeriod(Period period) {
         BudgetPeriod firstBudgetPeriod = createBudgetPeriod(period.getStartDate());
         BudgetPeriod lastBudgetPeriod = createBudgetPeriod(period.getEndDate());
 
         double totalInMiddle = 0;
         for (BudgetPeriod b: firstBudgetPeriod.getBudgetPeriodsUntil(lastBudgetPeriod))
-            totalInMiddle += getAmount(period, b);
+            totalInMiddle += getAmountForPeriodWithinBudgetPeriod(period, b);
         return (long) totalInMiddle;
 
     }
 
-    private double getAmount(Period period, BudgetPeriod budgetPeriod) {
+    private double getAmountForPeriodWithinBudgetPeriod(Period period, BudgetPeriod budgetPeriod) {
         long amount = budgetPeriod.getAmount(this);
         long daysInPeriod = budgetPeriod.getDays();
         long overlappingDays = budgetPeriod.getPeriod().getOverlappingDays(period);
