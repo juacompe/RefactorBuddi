@@ -106,16 +106,14 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
     }
 
     private long getAmount(Period period) {
-        //If Start and End are in the same budget period
         BudgetPeriod firstBudgetPeriod = createBudgetPeriod(period.getStartDate());
         BudgetPeriod lastBudgetPeriod = createBudgetPeriod(period.getEndDate());
-        Date startOfFirstBudgetPeriod = firstBudgetPeriod.getStartDate();
         Date endOfFirstBudgetPeriod = getBudgetPeriodType().getEndOfBudgetPeriod(period.getStartDate());
         Date startOfLastBudgetPeriod = lastBudgetPeriod.getStartDate();
-        if (startOfFirstBudgetPeriod.equals(startOfLastBudgetPeriod)) {
+
+        if (firstBudgetPeriod.equals(lastBudgetPeriod)) {
             return (long) getAmountFromPeriod(period);
         }
-
 
         //If the area between Start and End overlap at least two budget periods.
         if (getBudgetPeriodType().getBudgetPeriodOffset(period.getStartDate(), 1).equals(startOfLastBudgetPeriod)
