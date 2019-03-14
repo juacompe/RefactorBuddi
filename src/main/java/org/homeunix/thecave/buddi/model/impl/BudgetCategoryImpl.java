@@ -116,13 +116,13 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
         }
 
         //If the area between Start and End overlap at least two budget periods.
-        if (getBudgetPeriodType().getBudgetPeriodOffset(period.getStartDate(), 1).equals(startOfLastBudgetPeriod)
-                || getBudgetPeriodType().getBudgetPeriodOffset(period.getStartDate(), 1).before(startOfLastBudgetPeriod)) {
+        if (firstBudgetPeriod.getStartDateOfNextBudgetPeriod().equals(startOfLastBudgetPeriod)
+                || firstBudgetPeriod.getStartDateOfNextBudgetPeriod().before(startOfLastBudgetPeriod)) {
             double totalStartPeriod = getAmountFromPeriod(new Period(period.getStartDate(), endOfFirstBudgetPeriod));
 
             double totalInMiddle = 0;
             for (String periodKey : getBudgetPeriods(
-                    getBudgetPeriodType().getBudgetPeriodOffset(period.getStartDate(), 1),
+                    firstBudgetPeriod.getStartDateOfNextBudgetPeriod(),
                     getBudgetPeriodType().getBudgetPeriodOffset(period.getEndDate(), -1))) {
                 totalInMiddle += getAmount(getPeriodDate(periodKey));
             }
@@ -156,7 +156,7 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
 
         while (temp.before(getBudgetPeriodType().getEndOfBudgetPeriod(endDate))) {
             budgetPeriodKeys.add(getPeriodKey(temp));
-            temp = getBudgetPeriodType().getBudgetPeriodOffset(temp, 1);
+            temp = createBudgetPeriod(temp).getStartDateOfNextBudgetPeriod();
         }
 
         return budgetPeriodKeys;

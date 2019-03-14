@@ -7,6 +7,7 @@ import java.util.Date;
 public class BudgetPeriod {
     private final Date date;
     private BudgetCategoryType budgetPeriodType;
+    private BudgetCategoryType budgetPeriodType1;
 
     public BudgetPeriod(Date startDate, BudgetCategoryType budgetPeriodType) {
         date = startDate;
@@ -26,4 +27,7 @@ public class BudgetPeriod {
         return getStartDate().equals(((BudgetPeriod) obj).getStartDate());
     }
 
+    Date getStartDateOfNextBudgetPeriod() {
+        return budgetPeriodType.getBudgetPeriodOffset(getStartDate(), 1);
+    }
 }
