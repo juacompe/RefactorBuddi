@@ -109,25 +109,25 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
         BudgetPeriod firstBudgetPeriod = createBudgetPeriod(period.getStartDate());
         BudgetPeriod lastBudgetPeriod = createBudgetPeriod(period.getEndDate());
         Date endOfFirstBudgetPeriod = getBudgetPeriodType().getEndOfBudgetPeriod(period.getStartDate());
-        Date startOfLastBudgetPeriod = lastBudgetPeriod.getStartDate();
 
         if (firstBudgetPeriod.equals(lastBudgetPeriod)) {
             return (long) getAmountFromPeriod(period);
         }
 
         //If the area between Start and End overlap at least two budget periods.
-        if (firstBudgetPeriod.getStartDateOfNextBudgetPeriod().equals(startOfLastBudgetPeriod)
-                || firstBudgetPeriod.getStartDateOfNextBudgetPeriod().before(startOfLastBudgetPeriod)) {
+        BudgetPeriod secondBudgetPeriod = firstBudgetPeriod.getNext();
+        if (secondBudgetPeriod.equals(lastBudgetPeriod)
+                || secondBudgetPeriod.getStartDate().before(lastBudgetPeriod.getStartDate())) {
             double totalStartPeriod = getAmountFromPeriod(new Period(period.getStartDate(), endOfFirstBudgetPeriod));
 
             double totalInMiddle = 0;
             for (String periodKey : getBudgetPeriods(
-                    firstBudgetPeriod.getStartDateOfNextBudgetPeriod(),
-                    getBudgetPeriodType().getBudgetPeriodOffset(period.getEndDate(), -1))) {
+                    secondBudgetPeriod.getStartDate(),
+                    createBudgetPeriod(period.getEndDate()).getPrevious().getStartDate())) {
                 totalInMiddle += getAmount(getPeriodDate(periodKey));
             }
 
-            double totalEndPeriod = getAmountFromPeriod(new Period(startOfLastBudgetPeriod, period.getEndDate()));
+            double totalEndPeriod = getAmountFromPeriod(new Period(lastBudgetPeriod.getStartDate(), period.getEndDate()));
             return (long) (totalStartPeriod + totalInMiddle + totalEndPeriod);
         }
 
@@ -156,7 +156,7 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
 
         while (temp.before(getBudgetPeriodType().getEndOfBudgetPeriod(endDate))) {
             budgetPeriodKeys.add(getPeriodKey(temp));
-            temp = createBudgetPeriod(temp).getStartDateOfNextBudgetPeriod();
+            temp = createBudgetPeriod(temp).getNext().getStartDate();
         }
 
         return budgetPeriodKeys;
