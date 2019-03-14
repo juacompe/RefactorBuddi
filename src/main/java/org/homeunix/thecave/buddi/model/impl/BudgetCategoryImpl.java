@@ -114,24 +114,19 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
             return (long) getAmountFromPeriod(period);
         }
 
-        //If the area between Start and End overlap at least two budget periods.
         BudgetPeriod secondBudgetPeriod = firstBudgetPeriod.getNext();
-        if (secondBudgetPeriod.equals(lastBudgetPeriod)
-                || secondBudgetPeriod.getStartDate().before(lastBudgetPeriod.getStartDate())) {
-            double totalStartPeriod = getAmountFromPeriod(new Period(period.getStartDate(), endOfFirstBudgetPeriod));
+        double totalStartPeriod = getAmountFromPeriod(new Period(period.getStartDate(), endOfFirstBudgetPeriod));
 
-            double totalInMiddle = 0;
-            for (String periodKey : getBudgetPeriods(
-                    secondBudgetPeriod.getStartDate(),
-                    createBudgetPeriod(period.getEndDate()).getPrevious().getStartDate())) {
-                totalInMiddle += getAmount(getPeriodDate(periodKey));
-            }
-
-            double totalEndPeriod = getAmountFromPeriod(new Period(lastBudgetPeriod.getStartDate(), period.getEndDate()));
-            return (long) (totalStartPeriod + totalInMiddle + totalEndPeriod);
+        double totalInMiddle = 0;
+        for (String periodKey : getBudgetPeriods(
+                secondBudgetPeriod.getStartDate(),
+                createBudgetPeriod(period.getEndDate()).getPrevious().getStartDate())) {
+            totalInMiddle += getAmount(getPeriodDate(periodKey));
         }
 
-        throw new RuntimeException("You should not be here.  We have returned all legitimate numbers from getAmount(Date, Date) in BudgetCategoryImpl.  Please contact Wyatt Olson with details on how you got here (what steps did you perform in Buddi to get this error message).");
+        double totalEndPeriod = getAmountFromPeriod(new Period(lastBudgetPeriod.getStartDate(), period.getEndDate()));
+        return (long) (totalStartPeriod + totalInMiddle + totalEndPeriod);
+
     }
 
     private double getAmountFromPeriod(Period period) {
