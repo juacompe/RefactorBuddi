@@ -20,4 +20,10 @@ public class BudgetPeriod {
     Date getStartDate() {
         return this.budgetPeriodType.getStartOfBudgetPeriod(getDate());
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return getStartDate().equals(((BudgetPeriod) obj).getStartDate());
+    }
+
 }
