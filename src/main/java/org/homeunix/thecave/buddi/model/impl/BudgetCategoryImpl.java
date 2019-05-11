@@ -113,20 +113,16 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
         //If the area between Start and End overlap at least two budget periods.
         Date startOfSecondBudgetPeriod = getBudgetPeriodType().getBudgetPeriodOffset(period.getStartDate(), 1);
         Date endDateOfFirstBudgetPeriod = getBudgetPeriodType().getEndOfBudgetPeriod(period.getStartDate());
-        if (startOfSecondBudgetPeriod.equals(lastBudgetPeriod.getStartDate())
-                || startOfSecondBudgetPeriod.before(lastBudgetPeriod.getStartDate())) {
-            double totalStartPeriod = getAmountFromPeriod(new Period(period.getStartDate(), endDateOfFirstBudgetPeriod));
-            double totalInMiddle = 0;
-            for (String periodKey : getBudgetPeriods(
-                    startOfSecondBudgetPeriod,
-                    getBudgetPeriodType().getBudgetPeriodOffset(period.getEndDate(), -1))) {
-                totalInMiddle += getAmount(getPeriodDate(periodKey));
-            }
-            double totalEndPeriod = getAmountFromPeriod(new Period(lastBudgetPeriod.getStartDate(), period.getEndDate()));
-            return (long) (totalStartPeriod + totalInMiddle + totalEndPeriod);
+        double totalStartPeriod = getAmountFromPeriod(new Period(period.getStartDate(), endDateOfFirstBudgetPeriod));
+        double totalInMiddle = 0;
+        for (String periodKey : getBudgetPeriods(
+                startOfSecondBudgetPeriod,
+                getBudgetPeriodType().getBudgetPeriodOffset(period.getEndDate(), -1))) {
+            totalInMiddle += getAmount(getPeriodDate(periodKey));
         }
+        double totalEndPeriod = getAmountFromPeriod(new Period(lastBudgetPeriod.getStartDate(), period.getEndDate()));
+        return (long) (totalStartPeriod + totalInMiddle + totalEndPeriod);
 
-        throw new RuntimeException("You should not be here.  We have returned all legitimate numbers from getAmount(Date, Date) in BudgetCategoryImpl.  Please contact Wyatt Olson with details on how you got here (what steps did you perform in Buddi to get this error message).");
     }
 
     private BudgetPeriod createBudgetPeriod(Date startDate) {
