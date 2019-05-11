@@ -26,4 +26,7 @@ public class BudgetPeriod {
         return getStartDate().equals(((BudgetPeriod) obj).getStartDate());
     }
 
+    long getDays() {
+        return budgetPeriodType.getDaysInPeriod(getStartDate());
+    }
 }
