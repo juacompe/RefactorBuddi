@@ -107,7 +107,7 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
 		Date startDateOfLastBudgetPeriod = getBudgetPeriodType().getStartOfBudgetPeriod(period.getEndDate());
 		if (getBudgetPeriodType().getStartOfBudgetPeriod(period.getStartDate()).equals(
 				startDateOfLastBudgetPeriod)){
-			return (long) getAmountInPeriod(period.getStartDate(), period.getEndDate());
+			return (long) getAmountInPeriod(period);
 		}
 
 		//If the area between Start and End overlap at least two budget periods.
@@ -115,7 +115,7 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
 				startDateOfLastBudgetPeriod)
 				|| getBudgetPeriodType().getBudgetPeriodOffset(period.getStartDate(), 1).before(
 				startDateOfLastBudgetPeriod)){
-			double totalStartPeriod = getAmountInPeriod(period.getStartDate(), endOfFirstBudgetPeriod);
+			double totalStartPeriod = getAmountInPeriod(new Period(period.getStartDate(), endOfFirstBudgetPeriod));
 
 			double totalInMiddle = 0;
 			for (String periodKey : getBudgetPeriods(
@@ -124,17 +124,17 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
 				totalInMiddle += getAmount(getPeriodDate(periodKey));
 			}
 
-			double totalEndPeriod = getAmountInPeriod(startDateOfLastBudgetPeriod, period.getEndDate());
+			double totalEndPeriod = getAmountInPeriod(new Period(startDateOfLastBudgetPeriod, period.getEndDate()));
 			return (long) (totalStartPeriod + totalInMiddle + totalEndPeriod);
 		}
 
 		throw new RuntimeException("You should not be here.  We have returned all legitimate numbers from getAmount(Date, Date) in BudgetCategoryImpl.  Please contact Wyatt Olson with details on how you got here (what steps did you perform in Buddi to get this error message).");
 	}
 
-	private double getAmountInPeriod(Date startDate, Date endDate) {
-		long amount = getAmount(startDate);
-		long daysInPeriod = getBudgetPeriodType().getDaysInPeriod(startDate);
-		long daysBetween = DateUtil.getDaysBetween(startDate, endDate, true);
+	private double getAmountInPeriod(Period period) {
+		long amount = getAmount(period.getStartDate());
+		long daysInPeriod = getBudgetPeriodType().getDaysInPeriod(period.getStartDate());
+		long daysBetween = DateUtil.getDaysBetween(period.getStartDate(), period.getEndDate(), true);
 		return ((double) amount / (double) daysInPeriod) * daysBetween;
 	}
 
