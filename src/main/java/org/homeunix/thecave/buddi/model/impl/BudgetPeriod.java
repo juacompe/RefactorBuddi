@@ -1,19 +1,21 @@
 package org.homeunix.thecave.buddi.model.impl;
 
+import org.homeunix.thecave.buddi.model.BudgetCategoryType;
+
 import java.util.Date;
 
 public class BudgetPeriod {
-    private final Date startDate;
+    private final Date date;
 
-    public BudgetPeriod(Date startDate) {
-        this.startDate = startDate;
+    public BudgetPeriod(Date date) {
+        this.date = date;
     }
 
-    public Date getStartDate() {
-        return startDate;
+    public Date getDate() {
+        return date;
     }
 
-    Date getStartOfBudgetPeriod(BudgetCategoryImpl budgetCategory) {
-        return budgetCategory.getBudgetPeriodType().getStartOfBudgetPeriod(getStartDate());
+    Date getStartDate(BudgetCategoryType budgetPeriodType) {
+        return budgetPeriodType.getStartOfBudgetPeriod(getDate());
     }
 }

@@ -506,7 +506,7 @@ public class ScheduledTransactionEditorDialog extends MossDialog implements Acti
 
 //	//Load the schedule pulldowns, based on which type of 
 //	// schedule we're following.
-//	startDateChooser.setDate(s.getStartDate());
+//	startDateChooser.setDate(s.getDate());
 //	frequencyPulldown.setSelectedItem(s.getFrequencyType());
 
 //	updateSchedulePulldown();
