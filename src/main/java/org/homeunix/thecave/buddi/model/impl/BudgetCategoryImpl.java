@@ -102,11 +102,13 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
 	}
 
 	private long getAmount(Period period) {
+		BudgetPeriod firstBudgetPeriod = new BudgetPeriod(period.getStartDate());
+		BudgetPeriod lastBudgetPeriod = new BudgetPeriod(period.getEndDate());
+		Date startDateOfLastBudgetPeriod = lastBudgetPeriod.getStartOfBudgetPeriod(this);
+		Date startOfFirstBudgetPeriod = firstBudgetPeriod.getStartOfBudgetPeriod(this);
 		Date endOfFirstBudgetPeriod = getBudgetPeriodType().getEndOfBudgetPeriod(period.getStartDate());
 		//If Start and End are in the same budget period
-		Date startDateOfLastBudgetPeriod = getBudgetPeriodType().getStartOfBudgetPeriod(period.getEndDate());
-		if (getBudgetPeriodType().getStartOfBudgetPeriod(period.getStartDate()).equals(
-				startDateOfLastBudgetPeriod)){
+		if (startOfFirstBudgetPeriod.equals(startDateOfLastBudgetPeriod)){
 			return (long) getAmountInPeriod(period);
 		}
 
@@ -148,7 +150,7 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
 	public List<String> getBudgetPeriods(Date startDate, Date endDate){
 		List<String> budgetPeriodKeys = new LinkedList<String>();
 
-		Date temp = getBudgetPeriodType().getStartOfBudgetPeriod(startDate);
+		Date temp = new BudgetPeriod(startDate).getStartOfBudgetPeriod(this);
 
 		while (temp.before(getBudgetPeriodType().getEndOfBudgetPeriod(endDate))){
 			budgetPeriodKeys.add(getPeriodKey(temp));
@@ -238,7 +240,7 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
 	 * @return
 	 */
 	private String getPeriodKey(Date periodDate){
-		Date d = getBudgetPeriodType().getStartOfBudgetPeriod(periodDate); 
+		Date d = new BudgetPeriod(periodDate).getStartOfBudgetPeriod(this);
 		return getBudgetPeriodType().getName() + ":" + DateUtil.getYear(d) + ":" + DateUtil.getMonth(d) + ":" + DateUtil.getDay(d);
 	}
 	/**
