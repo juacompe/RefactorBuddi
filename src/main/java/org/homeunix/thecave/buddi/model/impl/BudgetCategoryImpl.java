@@ -99,66 +99,54 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
 	public long getAmount(Date startDate, Date endDate){
 		if (startDate.after(endDate))
 			throw new RuntimeException("Start date cannot be before End Date!");
-		
-		Logger.getLogger(this.getClass().getName()).info("Starting to calculate the budgeted amount for " + getFullName() + " between " + startDate + " and " + endDate + ".");
-		
+
+		return getAmount2(new DateRange(startDate, endDate));
+	}
+
+	private long getAmount2(DateRange dateRange) {
+		Logger.getLogger(this.getClass().getName()).info("Starting to calculate the budgeted amount for " + getFullName() + " between " + dateRange.getStartDate() + " and " + dateRange.getEndDate() + ".");
+
 		//If Start and End are in the same budget period
-		if (getBudgetPeriodType().getStartOfBudgetPeriod(startDate).equals(
-				getBudgetPeriodType().getStartOfBudgetPeriod(endDate))){
-//			Logger.getLogger().info("Start Date and End Date are in the same period.");
-			long amount = getAmount(startDate);
-//			Logger.getLogger().info("Amount = " + amount);
-			long daysInPeriod = getBudgetPeriodType().getDaysInPeriod(startDate);
-//			Logger.getLogger().info("Days in Period = " + daysInPeriod);
-			long daysBetween = DateUtil.getDaysBetween(startDate, endDate, true);
-//			Logger.getLogger().info("Days Between = " + daysBetween);
-		
-//			Logger.getLogger().info("Returning " + (long) (((double) amount / (double) daysInPeriod) * daysBetween));
-//			Logger.getLogger().info("Finished calculating the budget amount.\n\n");
-			return (long) (((double) amount / (double) daysInPeriod) * daysBetween);
+		if (getBudgetPeriodType().getStartOfBudgetPeriod(dateRange.getStartDate()).equals(
+				getBudgetPeriodType().getStartOfBudgetPeriod(dateRange.getEndDate()))){
+			double total = getAmountFromDateRange(dateRange, dateRange.getEndDate());
+			return (long) total;
 		}
-		 
-		//If the area between Start and End overlap at least two budget periods. 
-		if (getBudgetPeriodType().getBudgetPeriodOffset(startDate, 1).equals(
-				getBudgetPeriodType().getStartOfBudgetPeriod(endDate))
-				|| getBudgetPeriodType().getBudgetPeriodOffset(startDate, 1).before(
-						getBudgetPeriodType().getStartOfBudgetPeriod(endDate))){
-//			Logger.getLogger().info("Start Date and End Date are in different budget periods.");
-			long amountStartPeriod = getAmount(startDate);
-//			Logger.getLogger().info("Amount Start Period = " + amountStartPeriod);
-			long daysInStartPeriod = getBudgetPeriodType().getDaysInPeriod(startDate);
-//			Logger.getLogger().info("Days in Start Period = " + daysInStartPeriod);
-			long daysAfterStartDateInStartPeriod = DateUtil.getDaysBetween(startDate, getBudgetPeriodType().getEndOfBudgetPeriod(startDate), true);
-//			Logger.getLogger().info("Days After Start Date in Start Period = " + daysAfterStartDateInStartPeriod);
-			double totalStartPeriod = (((double) amountStartPeriod / (double) daysInStartPeriod) * daysAfterStartDateInStartPeriod);
-//			Logger.getLogger().info("Total in Start Period = " + totalStartPeriod);
-			
+
+		Date endOfFirstBudgetPeriod = getBudgetPeriodType().getEndOfBudgetPeriod(dateRange.getStartDate());
+		//If the area between Start and End overlap at least two budget periods.
+		if (getBudgetPeriodType().getBudgetPeriodOffset(dateRange.getStartDate(), 1).equals(
+				getBudgetPeriodType().getStartOfBudgetPeriod(dateRange.getEndDate()))
+				|| getBudgetPeriodType().getBudgetPeriodOffset(dateRange.getStartDate(), 1).before(
+						getBudgetPeriodType().getStartOfBudgetPeriod(dateRange.getEndDate()))){
+			double totalStartPeriod = getAmountFromDateRange(dateRange, endOfFirstBudgetPeriod);
+
 			double totalInMiddle = 0;
 			for (String periodKey : getBudgetPeriods(
-					getBudgetPeriodType().getBudgetPeriodOffset(startDate, 1),
-					getBudgetPeriodType().getBudgetPeriodOffset(endDate, -1))) {
+					getBudgetPeriodType().getBudgetPeriodOffset(dateRange.getStartDate(), 1),
+					getBudgetPeriodType().getBudgetPeriodOffset(dateRange.getEndDate(), -1))) {
 				totalInMiddle += getAmount(getPeriodDate(periodKey));
 				Logger.getLogger(this.getClass().getName()).info("Added " + getAmount(getPeriodDate(periodKey)) + " to total for one period in between; current value is " + totalInMiddle);
 			}
-//			Logger.getLogger().info("Total in Middle = " + totalInMiddle);
-			
-			long amountEndPeriod = getAmount(endDate);
-//			Logger.getLogger().info("Amount End Period = " + amountEndPeriod);
-			long daysInEndPeriod = getBudgetPeriodType().getDaysInPeriod(endDate);
-//			Logger.getLogger().info("Days in End Period = " + daysInEndPeriod);
-			long daysBeforeEndDateInEndPeriod = DateUtil.getDaysBetween(getBudgetPeriodType().getStartOfBudgetPeriod(endDate), endDate, true);
-//			Logger.getLogger().info("Days before End Period = " + daysBeforeEndDateInEndPeriod);
-			double totalEndPeriod = (long) (((double) amountEndPeriod / (double) daysInEndPeriod) * daysBeforeEndDateInEndPeriod); 
-//			Logger.getLogger().info("Total in End Period = " + totalEndPeriod);
-			
-//			Logger.getLogger().info("Sum of Start Period, Middle, and End Period = " + (totalStartPeriod + totalInMiddle + totalEndPeriod));
-//			Logger.getLogger().info("Finished Calculating the Budget Amount\n\n");
+
+			long amountEndPeriod = getAmount(dateRange.getEndDate());
+			long daysInEndPeriod = getBudgetPeriodType().getDaysInPeriod(dateRange.getEndDate());
+			long daysBeforeEndDateInEndPeriod = DateUtil.getDaysBetween(getBudgetPeriodType().getStartOfBudgetPeriod(dateRange.getEndDate()), dateRange.getEndDate(), true);
+			double totalEndPeriod = (long) (((double) amountEndPeriod / (double) daysInEndPeriod) * daysBeforeEndDateInEndPeriod);
+
 			return (long) (totalStartPeriod + totalInMiddle + totalEndPeriod);
 		}
 
 		throw new RuntimeException("You should not be here.  We have returned all legitimate numbers from getAmount(Date, Date) in BudgetCategoryImpl.  Please contact Wyatt Olson with details on how you got here (what steps did you perform in Buddi to get this error message).");
 	}
-	
+
+	private double getAmountFromDateRange(DateRange dateRange, Date endDate) {
+		long amount = getAmount(dateRange.getStartDate());
+		long daysInPeriod = getBudgetPeriodType().getDaysInPeriod(dateRange.getStartDate());
+		long daysBetween = DateUtil.getDaysBetween(dateRange.getStartDate(), endDate, true);
+		return ((double) amount / (double) daysInPeriod) * daysBetween;
+	}
+
 	/**
 	 * Returns a list of BudgetPeriods, covering the entire range of periods
 	 * occupied by startDate to endDate.
