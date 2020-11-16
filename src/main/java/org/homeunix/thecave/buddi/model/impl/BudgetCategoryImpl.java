@@ -13,7 +13,6 @@ import org.homeunix.thecave.buddi.plugin.api.exception.DataModelProblemException
 import org.homeunix.thecave.buddi.plugin.api.exception.InvalidValueException;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Default implementation of an BudgetCategory.  You should not create this object directly; 
@@ -100,8 +99,7 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
 		if (startDate.after(endDate))
 			throw new RuntimeException("Start date cannot be before End Date!");
 		
-		Logger.getLogger(this.getClass().getName()).info("Starting to calculate the budgeted amount for " + getFullName() + " between " + startDate + " and " + endDate + ".");
-		
+
 		//If Start and End are in the same budget period
 		if (getBudgetPeriodType().getStartOfBudgetPeriod(startDate).equals(
 				getBudgetPeriodType().getStartOfBudgetPeriod(endDate))){
@@ -127,7 +125,6 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
 					getBudgetPeriodType().getBudgetPeriodOffset(startDate, 1),
 					getBudgetPeriodType().getBudgetPeriodOffset(endDate, -1))) {
 				totalInMiddle += getAmount(getPeriodDate(periodKey));
-				Logger.getLogger(this.getClass().getName()).info("Added " + getAmount(getPeriodDate(periodKey)) + " to total for one period in between; current value is " + totalInMiddle);
 			}
 
 			long amountEndPeriod = getAmount(endDate);
