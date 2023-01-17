@@ -101,10 +101,12 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
 		
 
 		//If Start and End are in the same budget period
-		Date startOfLastBudgetPeriod = getBudgetPeriodType().getStartOfBudgetPeriod(endDate);
-		Date endOfFirstBudgetPeriod = getBudgetPeriodType().getEndOfBudgetPeriod(startDate);
+		BudgetPeriod lastBudgetPeriod = createBudgetPeriod(endDate);
+		BudgetPeriod firstBudgetPeriod = createBudgetPeriod(startDate);
+		Date startOfLastBudgetPeriod = lastBudgetPeriod.getStartDate(this.getBudgetPeriodType());
+		Date endOfFirstBudgetPeriod = firstBudgetPeriod.getEndDate(this.getBudgetPeriodType());
 
-		if (getBudgetPeriodType().getStartOfBudgetPeriod(startDate).equals(
+		if (createBudgetPeriod(startDate).getStartDate(this.getBudgetPeriodType()).equals(
 				startOfLastBudgetPeriod)){
 			return (long) getBudgetInPeriod(new Period(startDate, endDate));
 		}
@@ -132,12 +134,15 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
 		throw new RuntimeException("You should not be here.  We have returned all legitimate numbers from getAmount(Date, Date) in BudgetCategoryImpl.  Please contact Wyatt Olson with details on how you got here (what steps did you perform in Buddi to get this error message).");
 	}
 
+	private BudgetPeriod createBudgetPeriod(Date endDate) {
+		return new BudgetPeriod(endDate);
+	}
+
 	private double getBudgetInPeriod(Period period) {
 		long amount = getAmount(period.getStartDate());
 		long daysInPeriod = getBudgetPeriodType().getDaysInPeriod(period.getStartDate());
 		long daysBetween = DateUtil.getDaysBetween(period.getStartDate(), period.getEndDate(), true);
-		double total = ((double) amount / (double) daysInPeriod) * daysBetween;
-		return total;
+		return ((double) amount / (double) daysInPeriod) * daysBetween;
 	}
 
 	/**
@@ -150,9 +155,9 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
 	public List<String> getBudgetPeriods(Date startDate, Date endDate){
 		List<String> budgetPeriodKeys = new LinkedList<String>();
 
-		Date temp = getBudgetPeriodType().getStartOfBudgetPeriod(startDate);
+		Date temp = createBudgetPeriod(startDate).getStartDate(this.getBudgetPeriodType());
 
-		while (temp.before(getBudgetPeriodType().getEndOfBudgetPeriod(endDate))){
+		while (temp.before(new BudgetPeriod(endDate).getEndDate(this.getBudgetPeriodType()))){
 			budgetPeriodKeys.add(getPeriodKey(temp));
 			temp = getBudgetPeriodType().getBudgetPeriodOffset(temp, 1);
 		}
@@ -240,7 +245,7 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
 	 * @return
 	 */
 	private String getPeriodKey(Date periodDate){
-		Date d = getBudgetPeriodType().getStartOfBudgetPeriod(periodDate); 
+		Date d = createBudgetPeriod(periodDate).getStartDate(this.getBudgetPeriodType());
 		return getBudgetPeriodType().getName() + ":" + DateUtil.getYear(d) + ":" + DateUtil.getMonth(d) + ":" + DateUtil.getDay(d);
 	}
 	/**
@@ -254,7 +259,7 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
 			int year = Integer.parseInt(splitKey[1]);
 			int month = Integer.parseInt(splitKey[2]);
 			int day = Integer.parseInt(splitKey[3]);
-			return getBudgetPeriodType().getStartOfBudgetPeriod(DateUtil.getDate(year, month, day));
+			return createBudgetPeriod(DateUtil.getDate(year, month, day)).getStartDate(this.getBudgetPeriodType());
 		}
 
 		throw new DataModelProblemException("Cannot parse date from key " + periodKey);
