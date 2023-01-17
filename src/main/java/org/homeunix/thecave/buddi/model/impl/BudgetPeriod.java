@@ -37,4 +37,11 @@ public class BudgetPeriod {
     BudgetPeriod next() {
         return createBudgetPeriod(budgetPeriodType.getBudgetPeriodOffset(getDate(), 1), budgetPeriodType);
     }
+    BudgetPeriod previous() {
+        return createBudgetPeriod(budgetPeriodType.getBudgetPeriodOffset(getDate(), -1), budgetPeriodType);
+    }
+
+    boolean before(BudgetPeriod lastBudgetPeriod) {
+        return getStartDate().before(lastBudgetPeriod.previous().getEndDate());
+    }
 }

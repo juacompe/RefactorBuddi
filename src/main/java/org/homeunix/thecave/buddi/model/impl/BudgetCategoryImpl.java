@@ -106,7 +106,16 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
         double totalStartPeriod = getBudgetInPeriod(new Period(startDate, firstBudgetPeriod.getEndDate()));
 
         double totalInMiddle = 0;
-        for (String periodKey : getBudgetPeriods(firstBudgetPeriod.next().getStartDate(), getBudgetPeriodType().getBudgetPeriodOffset(endDate, -1))) {
+        List<String> budgetPeriodKeys = new LinkedList<String>();
+
+        BudgetPeriod budgetPeriod = firstBudgetPeriod.next();
+
+        while (budgetPeriod.before(lastBudgetPeriod)) {
+            budgetPeriodKeys.add(getPeriodKey(budgetPeriod.getStartDate()));
+            budgetPeriod = budgetPeriod.next();
+        }
+
+        for (String periodKey : budgetPeriodKeys) {
             totalInMiddle += getAmount(getPeriodDate(periodKey));
         }
 
@@ -120,27 +129,6 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
         long daysInPeriod = getBudgetPeriodType().getDaysInPeriod(period.getStartDate());
         long daysBetween = DateUtil.getDaysBetween(period.getStartDate(), period.getEndDate(), true);
         return ((double) amount / (double) daysInPeriod) * daysBetween;
-    }
-
-    /**
-     * Returns a list of BudgetPeriods, covering the entire range of periods
-     * occupied by startDate to endDate.
-     *
-     * @param startDate
-     * @param endDate
-     * @return
-     */
-    public List<String> getBudgetPeriods(Date startDate, Date endDate) {
-        List<String> budgetPeriodKeys = new LinkedList<String>();
-
-        Date temp = BudgetPeriod.createBudgetPeriod(startDate, this.getBudgetPeriodType()).getStartDate();
-
-        while (temp.before(BudgetPeriod.createBudgetPeriod(endDate, this.getBudgetPeriodType()).getEndDate())) {
-            budgetPeriodKeys.add(getPeriodKey(temp));
-            temp = getBudgetPeriodType().getBudgetPeriodOffset(temp, 1);
-        }
-
-        return budgetPeriodKeys;
     }
 
     /**
