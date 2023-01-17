@@ -13,6 +13,10 @@ public class BudgetPeriod {
         this.budgetPeriodType = budgetPeriodType;
     }
 
+    static BudgetPeriod createBudgetPeriod(Date endDate, BudgetCategoryType budgetPeriodType) {
+        return new BudgetPeriod(endDate, budgetPeriodType);
+    }
+
     public Date getDate() {
         return date;
     }
@@ -27,7 +31,10 @@ public class BudgetPeriod {
 
     @Override
     public boolean equals(Object obj) {
-        return getStartDate().equals(
-                ((BudgetPeriod) obj).getStartDate());
+        return getStartDate().equals(((BudgetPeriod) obj).getStartDate());
+    }
+
+    BudgetPeriod next() {
+        return createBudgetPeriod(budgetPeriodType.getBudgetPeriodOffset(getDate(), 1), budgetPeriodType);
     }
 }
