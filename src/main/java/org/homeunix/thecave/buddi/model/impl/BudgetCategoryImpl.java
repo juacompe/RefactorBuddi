@@ -100,24 +100,20 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
 			throw new RuntimeException("Start date cannot be before End Date!");
 		
 
-		//If Start and End are in the same budget period
-		BudgetPeriod lastBudgetPeriod = createBudgetPeriod(endDate, this.getBudgetPeriodType());
 		BudgetPeriod firstBudgetPeriod = createBudgetPeriod(startDate, this.getBudgetPeriodType());
-		Date startOfLastBudgetPeriod = lastBudgetPeriod.getStartDate();
-		Date endOfFirstBudgetPeriod = firstBudgetPeriod.getEndDate();
+		BudgetPeriod lastBudgetPeriod = createBudgetPeriod(endDate, this.getBudgetPeriodType());
 
-		if (createBudgetPeriod(startDate, this.getBudgetPeriodType()).getStartDate().equals(
-				startOfLastBudgetPeriod)){
+		if (firstBudgetPeriod.equals(lastBudgetPeriod)){
 			return (long) getBudgetInPeriod(new Period(startDate, endDate));
 		}
 
 		//If the area between Start and End overlap at least two budget periods.
 		if (getBudgetPeriodType().getBudgetPeriodOffset(startDate, 1).equals(
-				startOfLastBudgetPeriod)
+				lastBudgetPeriod.getStartDate())
 				|| getBudgetPeriodType().getBudgetPeriodOffset(startDate, 1).before(
-				startOfLastBudgetPeriod)){
+				lastBudgetPeriod.getStartDate())){
 
-			double totalStartPeriod = getBudgetInPeriod(new Period(startDate, endOfFirstBudgetPeriod));
+			double totalStartPeriod = getBudgetInPeriod(new Period(startDate, firstBudgetPeriod.getEndDate()));
 
 			double totalInMiddle = 0;
 			for (String periodKey : getBudgetPeriods(
@@ -126,8 +122,7 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
 				totalInMiddle += getAmount(getPeriodDate(periodKey));
 			}
 
-			double totalEndPeriod = getBudgetInPeriod(new Period(startOfLastBudgetPeriod, endDate));
-
+			double totalEndPeriod = getBudgetInPeriod(new Period(lastBudgetPeriod.getStartDate(), endDate));
 			return (long) (totalStartPeriod + totalInMiddle + totalEndPeriod);
 		}
 
