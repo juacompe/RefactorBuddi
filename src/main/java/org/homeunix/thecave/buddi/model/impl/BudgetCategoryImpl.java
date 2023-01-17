@@ -99,25 +99,25 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
         BudgetPeriod lastBudgetPeriod = BudgetPeriod.createBudgetPeriod(endDate, this.getBudgetPeriodType());
 
         if (firstBudgetPeriod.equals(lastBudgetPeriod)) {
-            return (long) getBudgetInPeriod(new Period(startDate, endDate));
+            return (long) getBudgetInPeriod(new Period(startDate, endDate), firstBudgetPeriod);
         }
 
-        double totalStartPeriod = getBudgetInPeriod(new Period(startDate, firstBudgetPeriod.getEndDate()));
+        double totalStartPeriod = getBudgetInPeriod(new Period(startDate, firstBudgetPeriod.getEndDate()), firstBudgetPeriod);
         double totalInMiddle = 0;
         BudgetPeriod budgetPeriod = firstBudgetPeriod.next();
-        while (budgetPeriod.before(lastBudgetPeriod)) {
+        while (budgetPeriod.before(lastBudgetPeriod.previous())) {
             totalInMiddle += getAmount(budgetPeriod.getDate());
             budgetPeriod = budgetPeriod.next();
         }
-        double totalEndPeriod = getBudgetInPeriod(new Period(lastBudgetPeriod.getStartDate(), endDate));
+        double totalEndPeriod = getBudgetInPeriod(new Period(lastBudgetPeriod.getStartDate(), endDate), lastBudgetPeriod);
         return (long) (totalStartPeriod + totalInMiddle + totalEndPeriod);
     }
 
-    private double getBudgetInPeriod(Period period) {
-        long amount = getAmount(period.getStartDate());
-        long daysInPeriod = getBudgetPeriodType().getDaysInPeriod(period.getStartDate());
-        long daysBetween = DateUtil.getDaysBetween(period.getStartDate(), period.getEndDate(), true);
-        return ((double) amount / (double) daysInPeriod) * daysBetween;
+    private double getBudgetInPeriod(Period period, BudgetPeriod budgetPeriod) {
+        long amount = getAmount(budgetPeriod.getDate());
+        long daysInPeriod = budgetPeriod.daysInPeriod();
+        long overlappingDays = period.overlappingDays(budgetPeriod.period());
+        return ((double) amount / (double) daysInPeriod) * overlappingDays;
     }
 
     /**

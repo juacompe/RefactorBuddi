@@ -42,6 +42,14 @@ public class BudgetPeriod {
     }
 
     boolean before(BudgetPeriod lastBudgetPeriod) {
-        return getStartDate().before(lastBudgetPeriod.previous().getEndDate());
+        return getStartDate().before(lastBudgetPeriod.getEndDate());
+    }
+
+    long daysInPeriod() {
+        return budgetPeriodType.getDaysInPeriod(getDate());
+    }
+
+    Period period() {
+        return new Period(getStartDate(), getEndDate());
     }
 }
