@@ -6,20 +6,22 @@ import java.util.Date;
 
 public class BudgetPeriod {
     private final Date date;
+    private BudgetCategoryType budgetPeriodType;
 
-    public BudgetPeriod(Date date) {
+    public BudgetPeriod(Date date, BudgetCategoryType budgetPeriodType) {
         this.date = date;
+        this.budgetPeriodType = budgetPeriodType;
     }
 
     public Date getDate() {
         return date;
     }
 
-    Date getStartDate(BudgetCategoryType budgetPeriodType) {
+    Date getStartDate() {
         return budgetPeriodType.getStartOfBudgetPeriod(getDate());
     }
 
-    Date getEndDate(BudgetCategoryType budgetPeriodType) {
+    Date getEndDate() {
         return budgetPeriodType.getEndOfBudgetPeriod(getDate());
     }
 }
