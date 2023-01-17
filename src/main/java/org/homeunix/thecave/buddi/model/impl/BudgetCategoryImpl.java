@@ -106,17 +106,12 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
         double totalStartPeriod = getBudgetInPeriod(new Period(startDate, firstBudgetPeriod.getEndDate()));
 
         double totalInMiddle = 0;
-        List<String> budgetPeriodKeys = new LinkedList<String>();
 
         BudgetPeriod budgetPeriod = firstBudgetPeriod.next();
 
         while (budgetPeriod.before(lastBudgetPeriod)) {
-            budgetPeriodKeys.add(getPeriodKey(budgetPeriod.getStartDate()));
+            totalInMiddle += getAmount(budgetPeriod.getDate());
             budgetPeriod = budgetPeriod.next();
-        }
-
-        for (String periodKey : budgetPeriodKeys) {
-            totalInMiddle += getAmount(getPeriodDate(periodKey));
         }
 
         double totalEndPeriod = getBudgetInPeriod(new Period(lastBudgetPeriod.getStartDate(), endDate));
