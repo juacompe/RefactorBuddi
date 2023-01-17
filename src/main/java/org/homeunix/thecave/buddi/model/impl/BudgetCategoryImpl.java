@@ -103,21 +103,16 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
             return (long) getBudgetInPeriod(new Period(startDate, endDate));
         }
 
-        //If the area between Start and End overlap at least two budget periods.
-        if (firstBudgetPeriod.next().equals(lastBudgetPeriod) || firstBudgetPeriod.next().getStartDate().before(lastBudgetPeriod.getStartDate())) {
+        double totalStartPeriod = getBudgetInPeriod(new Period(startDate, firstBudgetPeriod.getEndDate()));
 
-            double totalStartPeriod = getBudgetInPeriod(new Period(startDate, firstBudgetPeriod.getEndDate()));
-
-            double totalInMiddle = 0;
-            for (String periodKey : getBudgetPeriods(firstBudgetPeriod.next().getStartDate(), getBudgetPeriodType().getBudgetPeriodOffset(endDate, -1))) {
-                totalInMiddle += getAmount(getPeriodDate(periodKey));
-            }
-
-            double totalEndPeriod = getBudgetInPeriod(new Period(lastBudgetPeriod.getStartDate(), endDate));
-            return (long) (totalStartPeriod + totalInMiddle + totalEndPeriod);
+        double totalInMiddle = 0;
+        for (String periodKey : getBudgetPeriods(firstBudgetPeriod.next().getStartDate(), getBudgetPeriodType().getBudgetPeriodOffset(endDate, -1))) {
+            totalInMiddle += getAmount(getPeriodDate(periodKey));
         }
 
-        throw new RuntimeException("You should not be here.  We have returned all legitimate numbers from getAmount(Date, Date) in BudgetCategoryImpl.  Please contact Wyatt Olson with details on how you got here (what steps did you perform in Buddi to get this error message).");
+        double totalEndPeriod = getBudgetInPeriod(new Period(lastBudgetPeriod.getStartDate(), endDate));
+        return (long) (totalStartPeriod + totalInMiddle + totalEndPeriod);
+
     }
 
     private double getBudgetInPeriod(Period period) {
