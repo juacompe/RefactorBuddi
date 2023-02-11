@@ -102,7 +102,8 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
 	}
 
 	private long getAmount(Period period) {
-		Date startDateOfFirstBudgetPeriod = getBudgetPeriodType().getStartOfBudgetPeriod(period.getStartDate());
+		BudgetPeriod firstBudgetPeriod = createBudgetPeriod(period);
+		Date startDateOfFirstBudgetPeriod = firstBudgetPeriod.getStartDate();
 		Date startDateOfLastBudgetPeriod = getBudgetPeriodType().getStartOfBudgetPeriod(period.getEndDate());
 		Date endDateOfFirstBudgetPeriod = getBudgetPeriodType().getEndOfBudgetPeriod(period.getStartDate());
 
@@ -132,6 +133,10 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
 		}
 
 		throw new RuntimeException("You should not be here.  We have returned all legitimate numbers from getAmount(Date, Date) in BudgetCategoryImpl.  Please contact Wyatt Olson with details on how you got here (what steps did you perform in Buddi to get this error message).");
+	}
+
+	private BudgetPeriod createBudgetPeriod(Period period) {
+		return new BudgetPeriod(period.getStartDate(), this.getBudgetPeriodType());
 	}
 
 	private double getAmountInBudgetPeriod(Period period) {
@@ -242,7 +247,7 @@ public class BudgetCategoryImpl extends SourceImpl implements BudgetCategory {
 	 * @return
 	 */
 	private String getPeriodKey(Date periodDate){
-		Date d = getBudgetPeriodType().getStartOfBudgetPeriod(periodDate); 
+		Date d = getBudgetPeriodType().getStartOfBudgetPeriod(periodDate);
 		return getBudgetPeriodType().getName() + ":" + DateUtil.getYear(d) + ":" + DateUtil.getMonth(d) + ":" + DateUtil.getDay(d);
 	}
 	/**
